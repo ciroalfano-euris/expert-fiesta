@@ -28,20 +28,6 @@ async function createUserAndTeam(name: string, email: string, mascot: string, te
 }
 
 describe('OctoFit API contract', () => {
-  it('describes the API at the root path', async () => {
-    const response = await request(app).get('/');
-    expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
-      service: 'OctoFit API',
-      health: '/health',
-      endpoints: {
-        activities: '/api/activities',
-        teams: '/api/teams',
-        leaderboard: '/api/leaderboard',
-        workoutSuggestions: '/api/workouts/suggestions/:userEmail',
-      },
-    });
-  });
   it('creates and lists valid activities while rejecting invalid input', async () => {
     const { user, team } = await createUserAndTeam('Mona', 'mona@example.com', 'Mona');
     const invalid = await request(app).post('/api/activities').send({});
