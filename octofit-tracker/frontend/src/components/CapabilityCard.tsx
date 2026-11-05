@@ -1,16 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { getJson } from '../api/client.js';
 
 type Props<T> = {
   title: string;
   description: string;
-  path: string;
-  collection: string;
+  loadItems: () => Promise<T[]>;
   emptyText: string;
   renderItem: (item: T) => ReactNode;
 };
 
-export function CapabilityCard<T>({ title, description, path, collection, emptyText, renderItem }: Props<T>) {
+export function CapabilityCard<T>({ title, description, loadItems, emptyText, renderItem }: Props<T>) {
   const [items, setItems] = useState<T[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,18 +16,14 @@ export function CapabilityCard<T>({ title, description, path, collection, emptyT
     let active = true;
     setItems(null);
     setError(null);
-    getJson<Record<string, unknown>>(path)
-      .then((response) => {
-        const collectionItems = response[collection];
-        if (!Array.isArray(collectionItems)) throw new Error(`Invalid ${collection} response`);
-        if (active) setItems(collectionItems as T[]);
-      })
+    loadItems()
+      .then((results) => { if (active) setItems(results); })
       .catch((requestError: unknown) => {
         if (active) setError(requestError instanceof Error ? requestError.message : 'An unexpected error occurred');
       });
 
     return () => { active = false; };
-  }, [collection, path]);
+  }, [loadItems]);
 
   return <section className="card h-100"><div className="card-body">
     <h2 className="h4">{title}</h2>
